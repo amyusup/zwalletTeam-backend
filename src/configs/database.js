@@ -1,5 +1,4 @@
 const mysql = require('mysql')
-console.log(process.env.DB_HOSTNAME)
 module.exports = mysql.createConnection({
     host: process.env.DB_HOSTNAME,
     user: process.env.DB_USERNAME,
