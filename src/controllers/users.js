@@ -248,7 +248,7 @@ class Users {
       const bearerToken = req.headers["authorization"].split(" ")[1];
       const decoded = verify(bearerToken, process.env.SECRET);
       try {
-        const photo = `http://192.168.43.149:4444/images/${req.file.filename}`;
+        const photo = `${process.env.BASE_URL}/images/${req.file.filename}`;
         await updateUser({ photo }, decoded.id);
 
         return resSuccess(res, CREATED, "Success upload photo", photo);
