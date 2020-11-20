@@ -1,7 +1,7 @@
 const { compareSync, genSaltSync, hashSync } = require("bcryptjs");
 const { validationResult } = require("express-validator");
 const { sign } = require("jsonwebtoken");
-const { insertUser, getUserByEmail } = require("../models/users");
+const { insertUser, getUserByEmail, updateUser } = require("../models/users");
 const {
   resSuccess,
   resFailure,
@@ -13,7 +13,7 @@ const {
 
 class Auth {
   async loginUser(req, res) {
-    const { email, password: passwordBody } = req.body
+    const { email, password: passwordBody, device } = req.body
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty())
@@ -24,6 +24,11 @@ class Auth {
         return resFailure(res, UNAUTHORIZED, "Email and Password incorrect", {});
 
       const { password, role, id } = checkEmail[0];
+      if(device !== checkEmail[0].device && checkEmail[0].device !== ''){
+        return resFailure(res, BADREQUEST, "Your account has been logged in using another device, please log out and try to log in again", {});
+      }else if(checkEmail[0].device === ''){
+        await updateUser( {device:device} , checkEmail[0].id);
+      }
       const compare = compareSync(passwordBody, password);
       if (!compare)
         return resFailure(res, UNAUTHORIZED, "Email and Password incorrect", {});
@@ -31,12 +36,12 @@ class Auth {
       const data = { role, token: sign({ id, role }, process.env.SECRET) };
       return resSuccess(res, CREATED, "Login succesfully", data);
     } catch (e) {
-      return resFailure(res, INTERNALSERVERERROR, "Internal Server Error", {});
+      return resFailure(res, INTERNALSERVERERROR, e.message, {});
     }
   }
 
   async registerUser(req, res) {
-    const { name, email, password } = req.body
+    const { name, email, password, deviceToken } = req.body
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty())
@@ -50,6 +55,7 @@ class Auth {
         name: name,
         email: email,
         password: hashSync(password, genSaltSync(10)),
+        device:deviceToken
       });
 
       const data = {

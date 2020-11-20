@@ -1,21 +1,29 @@
-const db = require('../configs/database')
-const query = require('../helpers/query')
+const db = require("../configs/database");
+const query = require("../helpers/query");
 
 class Transactions {
-    getTransactions() {
-        return query("SELECT a.id, a.note, a.total, b.name AS _from, c.name AS _to FROM transactions AS a INNER JOIN users AS b ON a.id_from_user = b.id INNER JOIN users AS c ON a.id_to_user = c.id")
-    }
+  getTransactions() {
+    return query(
+      "SELECT a.id, a.note, a.total, b.name AS _from, c.name AS _to FROM transactions AS a INNER JOIN users AS b ON a.id_from_user = b.id INNER JOIN users AS c ON a.id_to_user = c.id"
+    );
+  }
 
-    getTransaction(id) {
-        return query("SELECT id FROM transactions WHERE id = ?", [id])
-    }
+  getTransaction(id) {
+    return query("SELECT id FROM transactions WHERE id = ?", [id]);
+  }
 
-
-    getAllTransactionsByUserid(id, limit = 5, offset = 1) {
-        const limitNew = !isNaN(parseInt(limit)) ? parseInt(limit) : 5
-        const offsetNew = !isNaN(parseInt(offset)) ? parseInt(offset) : 1
-
-        return query(`
+  getAllTransactionsByUserid(id, limit = 5, offset = 1, orderBy) {
+    const limitNew = !isNaN(parseInt(limit)) ? parseInt(limit) : 5;
+    const offsetNew = !isNaN(parseInt(offset)) ? parseInt(offset) : 1;
+    const orderByNew =
+      orderBy === "expense"
+        ? `(a.type = 'transfer' AND a.id_user = ${id} ) `
+        : orderBy === "income"
+        ? `(a.type = 'topup' AND a.id_user = ${id}) OR (a.type = 'transfer' AND b.id_receiver = ${id}) `
+        : `(a.type = 'transfer' AND (a.id_user = ${id} OR b.id_receiver = ${id})) OR (a.type = 'topup' AND a.id_user = ${id})`
+    // console.log(orderByNew);
+    return query(
+      `
             SELECT a.id, a.type, a.id_user,  d.name, d.photo,
                 c.amount AS amount_topup, c.va_number, c.va_type, c.order_id, c.status, a.created_at, c.paydate_at,
                 e.name AS name_receiver, e.photo AS photo_receiver, b.id_receiver, b.note, b.balance, b.amount
@@ -27,16 +35,18 @@ class Transactions {
             INNER JOIN users AS d
                 ON a.id_user = d.id
             LEFT JOIN users AS e
-                ON b.id_receiver = d.id
-            WHERE (a.type = 'transfer' AND (a.id_user = ? OR b.id_receiver = ?))
-            OR (a.type = 'topup' AND a.id_user = ?)
+                ON b.id_receiver = e.id
+            WHERE ${orderByNew}
             ORDER BY a.created_at DESC
             LIMIT ? OFFSET ?
-        `, [id, id, id, limitNew, (offsetNew - 1) * limitNew])
-    }
+        `,
+      [ limitNew, (offsetNew - 1) * limitNew]
+    );
+  }
 
-    getIncomeTransaction(id) {
-        return query(`
+  getIncomeTransaction(id) {
+    return query(
+      `
             SELECT SUM(b.amount) AS transfer, SUM(c.amount) AS topup
             FROM transactions AS a
             LEFT JOIN transfer_history AS b
@@ -46,22 +56,28 @@ class Transactions {
             WHERE (a.type = 'transfer' AND b.id_receiver = ?)
             OR (a.type = 'topup' AND a.id_user = ? AND status = 1)
             ORDER BY a.created_at DESC
-        `, [id, id])
-    }
+        `,
+      [id, id]
+    );
+  }
 
-    getExpenseTransaction(id) {
-        return query(`
+  getExpenseTransaction(id) {
+    return query(
+      `
             SELECT SUM(b.amount) AS transfer
             FROM transactions AS a
             LEFT JOIN transfer_history AS b
                 ON a.id_transfer = b.id
             WHERE (a.type = 'transfer' AND a.id_user = ?)
             ORDER BY a.created_at DESC
-        `, [id, id])
-    }
+        `,
+      [id, id]
+    );
+  }
 
-    getTransactionsByid(historyId, userId) {
-        return query(`
+  getTransactionsByid(historyId, userId) {
+    return query(
+      `
             SELECT a.id, a.type, a.id_user, d.phone, d.name, d.photo,
                 c.amount AS amount_topup, c.va_number, c.va_type, c.order_id, c.status, a.created_at, c.paydate_at,
                 e.name AS name_receiver, e.photo AS photo_receiver, e.phone AS phone_receiver, b.id_receiver, 
@@ -78,11 +94,14 @@ class Transactions {
             WHERE ( a.id = ? AND (a.type = 'transfer' AND (a.id_user = ? OR b.id_receiver = ?)))
             OR (a.id = ? AND (a.type = 'topup' AND a.id_user = ?))
             ORDER BY a.created_at DESC
-        `, [historyId, userId, userId, historyId, userId])
-    }
+        `,
+      [historyId, userId, userId, historyId, userId]
+    );
+  }
 
-    getTransactionsByOrderid(orderId) {
-        return query(`
+  getTransactionsByOrderid(orderId) {
+    return query(
+      `
             SELECT a.id, a.type, a.id_user,  d.name, d.photo, d.phone,
                 c.amount AS amount_topup, c.va_number, c.va_type, c.order_id, c.status, a.created_at, c.paydate_at,
                 e.name AS name_receiver, e.photo AS photo_receiver, e.phone AS phone_receiver,
@@ -98,38 +117,42 @@ class Transactions {
                 ON b.id_receiver = d.id
             WHERE a.type = 'topup' AND c.order_id = ?
             ORDER BY a.created_at DESC
-        `, [orderId])
-    }
+        `,
+      [orderId]
+    );
+  }
 
-    insertTransfer(data) {
-        return query("INSERT INTO transfer_history SET ?", data)
-    }
+  insertTransfer(data) {
+    return query("INSERT INTO transfer_history SET ?", data);
+  }
 
-    insertTopup(data) {
-        return query("INSERT INTO topup_history SET ?", data)
-    }
+  insertTopup(data) {
+    return query("INSERT INTO topup_history SET ?", data);
+  }
 
-    updateTopup(data, where) {
-        return query("UPDATE topup_history SET ? WHERE ?", [data, where])
-    }
+  updateTopup(data, where) {
+    return query("UPDATE topup_history SET ? WHERE ?", [data, where]);
+  }
 
-    insertTransactions(data) {
-        return query("INSERT INTO transactions SET ?", data)
-    }
+  insertTransactions(data) {
+    return query("INSERT INTO transactions SET ?", data);
+  }
 
-    updateTransactionData(data, id) {
-        return query("UPDATE transactions SET ? WHERE id = ?", [data, id])
-    }
+  updateTransactionData(data, id) {
+    return query("UPDATE transactions SET ? WHERE id = ?", [data, id]);
+  }
 
-    deleteTransaction(id) {
-        return query("DELETE FROM transactions WHERE id = ?", [id])
-    }
+  deleteTransaction(id) {
+    return query("DELETE FROM transactions WHERE id = ?", [id]);
+  }
 
-    //Admin
+  //Admin
 
-    getTransactions_Admin() {
-        return query("SELECT a.id, a.note, a.total, b.name AS from_name, b.photo AS from_photo, c.name AS to_name, c.photo AS to_photo, b.email AS from_email, c.email AS to_email, a.created_at FROM transactions AS a INNER JOIN users AS b ON a.id_from_user = b.id INNER JOIN users AS c ON a.id_to_user = c.id")
-    }
+  getTransactions_Admin() {
+    return query(
+      "SELECT a.id, a.note, a.total, b.name AS from_name, b.photo AS from_photo, c.name AS to_name, c.photo AS to_photo, b.email AS from_email, c.email AS to_email, a.created_at FROM transactions AS a INNER JOIN users AS b ON a.id_from_user = b.id INNER JOIN users AS c ON a.id_to_user = c.id"
+    );
+  }
 }
 
-module.exports = new Transactions()
+module.exports = new Transactions();

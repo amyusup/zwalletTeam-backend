@@ -2,6 +2,7 @@ const status = require('../helpers/status')
 const { findUsers, getUserById, updateUserBalance } = require('../models/users')
 const { insertTransactions, getTransaction, getTransactionsByUserid, getTransactions, deleteTransaction, updateTransactionData, getTransactions_Admin } = require('../models/transactions')
 
+
 class Transfer {
   async findUsersData(req, res) {
     const { name } = req.query
@@ -40,7 +41,8 @@ class Transfer {
   }
 
   async transferBalance(req, res) {
-    let { id_from, id_to, total } = req.body
+    let { id_from, id_to, total, deviceToken } = req.body
+    console.log(deviceToken)
     total = parseInt(total)
 
     if (id_from == id_to)
@@ -81,6 +83,7 @@ class Transfer {
         status: true,
         message: "Transfer has successfully"
       })
+      
     } catch (error) {
       console.log(error)
 

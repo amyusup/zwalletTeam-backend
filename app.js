@@ -1,10 +1,19 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+var admin = require("firebase-admin");
+var serviceAccount = require("./src/services/zwallet-amy-firebase-adminsdk-sdg8q-48576efe28.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: 'https://zwallet-amy.firebaseio.com'
+});
+
+// var registrationToken = "<registration token goes here>";
 
 require("dotenv").config();
 require("./src/configs/database").connect((err) =>
-  console.log(err ? err : "Database working")
+  console.log(err ? err : `Database working on ${process.env.DB_HOSTNAME}`)
 );
 
 // Middlewares

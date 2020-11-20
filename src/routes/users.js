@@ -8,6 +8,7 @@ const {
   transferBalance,
   findUsersData,
   createPin,
+  checkPin,
   getUserByToken,
   getHistoryById,
   addPhoneNumber,
@@ -70,6 +71,7 @@ router
   .post("/process-topup", processPayment)
   .patch("/phone", validateAddPhone, addPhoneNumber)
   .patch("/create_pin", validatePin, createPin)
+  .patch("/check-pin", validatePin, checkPin)
   .patch("/password", validatePassword, changePassword)
   .delete("/phone", deletePhoneNumber)
 module.exports = router;

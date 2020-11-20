@@ -32,7 +32,7 @@ class UserModel {
 
   getUserById(id) {
     return query(
-      "SELECT id, name, email, role, password, phone, photo, pin, balance FROM users WHERE id = ?",
+      "SELECT id, name, email, role, password, phone, photo, pin, balance, device FROM users WHERE id = ?",
       [id]
     );
   }
