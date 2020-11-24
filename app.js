@@ -4,6 +4,17 @@ const cors = require("cors");
 var admin = require("firebase-admin");
 var serviceAccount = require("./src/services/zwallet-amy-firebase-adminsdk-sdg8q-48576efe28.json");
 
+// //socket
+// const server = require('http').createServer(express());
+// const io = require('socket.io')(server);
+
+// io.on("connection", (socket) => {
+//   console.log("socket connect")
+//   socket.emit("refresh", "refresh");
+// });
+
+// server.listen(4444);
+
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   databaseURL: 'https://zwallet-amy.firebaseio.com'

@@ -218,6 +218,10 @@ class Users {
         }
        
       })
+      // io.on("connection", (socket) => {
+      //   console.log("socket connect")
+      //   socket.emit("hello", true);
+      // });
 
       return resSuccess(res, OK, "Success Transfer", {
         id: transactions.insertId,
