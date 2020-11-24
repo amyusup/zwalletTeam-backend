@@ -15,6 +15,7 @@ class Auth {
   async loginUser(req, res) {
     const { email, password: passwordBody, device } = req.body;
     try {
+      // console.log(device)
       const errors = validationResult(req);
       if (!errors.isEmpty())
         return resFailure(res, BADREQUEST, errors.array()[0].msg, {});
