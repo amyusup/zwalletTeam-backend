@@ -30,14 +30,15 @@ class Auth {
         );
 
       const { password, role, id } = checkEmail[0];
-      if (device !== checkEmail[0].device && checkEmail[0].device !== "") {
+      // console.log(checkEmail[0].device.length)
+      if (device !== checkEmail[0].device && checkEmail[0].device.length !== 0) {
         return resFailure(
           res,
           BADREQUEST,
           "Your account has been logged in using another device, please log out and try to log in again",
           {}
         );
-      } else if (checkEmail[0].device === "") {
+      } else if (checkEmail[0].device.length === 0) {
         await updateUser({ device: device }, checkEmail[0].id);
       }
       const compare = compareSync(passwordBody, password);
@@ -57,23 +58,24 @@ class Auth {
   }
 
   async registerUser(req, res) {
-    const { name, email, password, deviceToken } = req.body;
+    const { name, email, password } = req.body;
     try {
+      
       const errors = validationResult(req);
       if (!errors.isEmpty())
         return resFailure(res, BADREQUEST, errors.array()[0].msg, {});
 
       let checkEmail = await getUserByEmail(email);
+      
       if (checkEmail.length)
         return resFailure(res, UNAUTHORIZED, "Email has been taken", {});
 
       const register = await insertUser({
         name: name,
         email: email,
-        password: hashSync(password, genSaltSync(10)),
-        // device: deviceToken,
+        password: hashSync(password, genSaltSync(10))
       });
-
+      console.log(register)
       const data = {
         role: "user",
         token: sign(
@@ -83,7 +85,7 @@ class Auth {
       };
       return resSuccess(res, CREATED, "Register succesfully", data);
     } catch (e) {
-      return resFailure(res, INTERNALSERVERERROR, "Internal Server Error", {});
+      return resFailure(res, INTERNALSERVERERROR, e, {});
     }
   }
 
