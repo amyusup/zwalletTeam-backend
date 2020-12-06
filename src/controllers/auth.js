@@ -22,7 +22,9 @@ class Auth {
         return resFailure(res, BADREQUEST, errors.array()[0].msg, {});
 
       const checkEmail = await getUserByEmail(email);
-      if (!checkEmail.length)
+      console.log(checkEmail)
+      if (!checkEmail[0])
+      // console.log('sini')
         return resFailure(
           res,
           UNAUTHORIZED,
@@ -32,14 +34,14 @@ class Auth {
 
       const { password, role, id } = checkEmail[0];
       // console.log(checkEmail[0].device.length)
-      if (device !== checkEmail[0].device && checkEmail[0].device.length !== 0) {
+      if (device !== checkEmail[0].device && checkEmail[0].device) {
         return resFailure(
           res,
           BADREQUEST,
           "Your account has been logged in using another device, please log out and try to log in again",
           {}
         );
-      } else if (checkEmail[0].device.length === 0) {
+      } else if (!checkEmail[0].device) {
         await updateUser({ device: device }, checkEmail[0].id);
       }
       const compare = compareSync(passwordBody, password);
