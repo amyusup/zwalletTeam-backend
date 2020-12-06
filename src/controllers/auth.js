@@ -22,7 +22,7 @@ class Auth {
         return resFailure(res, BADREQUEST, errors.array()[0].msg, {});
 
       const checkEmail = await getUserByEmail(email);
-      if (!checkEmail)
+      if (!checkEmail.length)
         return resFailure(
           res,
           UNAUTHORIZED,
