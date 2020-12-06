@@ -14,6 +14,7 @@ const {
 class Auth {
   async loginUser(req, res) {
     const { email, password: passwordBody, device } = req.body;
+    // console.log(req.body)
     try {
       // console.log(device)
       const errors = validationResult(req);
@@ -21,7 +22,7 @@ class Auth {
         return resFailure(res, BADREQUEST, errors.array()[0].msg, {});
 
       const checkEmail = await getUserByEmail(email);
-      if (!checkEmail.length)
+      if (!checkEmail)
         return resFailure(
           res,
           UNAUTHORIZED,
