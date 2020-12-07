@@ -211,13 +211,13 @@ class Users {
       });
 
       // console.log(checkTo[0])
-       admin.messaging().sendToDevice(checkTo[0].device,{
-        notification:{
-          title:`Balance increases`,
-          body:`Your balance increases Rp. ${total} from ${checkFrom[0].name}`
-        }
+      //  admin.messaging().sendToDevice(checkTo[0].device,{
+      //   notification:{
+      //     title:`Balance increases`,
+      //     body:`Your balance increases Rp. ${total} from ${checkFrom[0].name}`
+      //   }
        
-      })
+      // })
       // io.on("connection", (socket) => {
       //   console.log("socket connect")
       //   socket.emit("hello", true);
