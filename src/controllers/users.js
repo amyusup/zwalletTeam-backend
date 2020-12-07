@@ -228,7 +228,8 @@ class Users {
       });
     } catch (error) {
       console.log(error);
-      return resFailure(res, INTERNALSERVERERROR, "Internal Server Error");
+      return resFailure(res, INTERNALSERVERERROR, error);
+      // return resFailure(res, INTERNALSERVERERROR, "Internal Server Error");
     }
   }
 
