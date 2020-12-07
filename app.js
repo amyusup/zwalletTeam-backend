@@ -13,7 +13,8 @@ var serviceAccount = require("./src/services/zwallet-amy-firebase-adminsdk-sdg8q
 //   socket.emit("refresh", "refresh");
 // });
 
-server.listen(4444);
+// server.listen(4444);
+
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),

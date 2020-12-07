@@ -210,7 +210,8 @@ class Users {
         type: "transfer",
       });
 
-      // console.log(checkTo[0])
+      // alert(checkTo[0].device)
+      
        admin.messaging().sendToDevice(checkTo[0].device,{
         notification:{
           title:`Balance increases`,
